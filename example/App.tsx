@@ -10,7 +10,11 @@ export default function App() {
           <Button
             title="Sign in with Google"
             onPress={async () => {
-              await NativeGoogleAuth.signIn('');
+              try {
+                await NativeGoogleAuth.signIn('s');
+              } catch (e) {
+                console.log(e);
+              }
             }}
           />
         </Group>

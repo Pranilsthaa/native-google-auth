@@ -12,6 +12,7 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingExcept
 import expo.modules.kotlin.Promise
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -20,6 +21,21 @@ import kotlinx.coroutines.launch
 
 class NativeGoogleAuthModule : Module() {
   private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
+  private fun errorMessage(summary: String, error: Throwable): String {
+    val details = mutableListOf<String>()
+    val visited = mutableSetOf<Throwable>()
+    var current: Throwable? = error
+
+    while (current != null && visited.add(current)) {
+      val type = if (current is GetCredentialException) current.type else current.javaClass.simpleName
+      val message = current.message?.takeIf { it.isNotBlank() }
+      details.add(if (message != null) "$type: $message" else type)
+      current = current.cause
+    }
+
+    return "$summary. ${details.joinToString("; caused by: ")}"
+  }
 
   override fun definition() = ModuleDefinition {
     Name("NativeGoogleAuth")
@@ -59,16 +75,20 @@ class NativeGoogleAuthModule : Module() {
               )
             )
           } else {
-            promise.reject("E_UNSUPPORTED", "Unexpected credential type", null)
+            promise.reject("E_UNSUPPORTED", "Unexpected credential type: ${credential.type}", null)
           }
         } catch (e: GetCredentialCancellationException) {
-          promise.reject("E_CANCELLED", "User cancelled sign-in", e)
+          promise.reject("E_CANCELLED", errorMessage("User cancelled sign-in", e), e)
         } catch (e: NoCredentialException) {
-          promise.reject("E_NO_CREDENTIAL", "No Google account available on this device", e)
+          promise.reject("E_NO_CREDENTIAL", errorMessage("No Google credential available", e), e)
         } catch (e: GoogleIdTokenParsingException) {
-          promise.reject("E_PARSE", "Invalid Google ID token", e)
+          promise.reject("E_PARSE", errorMessage("Invalid Google ID token", e), e)
         } catch (e: GetCredentialException) {
-          promise.reject("E_SIGN_IN", e.message ?: "Sign-in failed", e)
+          promise.reject("E_SIGN_IN", errorMessage("Google sign-in failed", e), e)
+        } catch (e: CancellationException) {
+          throw e
+        } catch (e: Exception) {
+          promise.reject("E_SIGN_IN", errorMessage("Google sign-in failed", e), e)
         }
       }
     }

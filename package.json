@@ -1,7 +1,7 @@
 {
   "name": "@stha_pranil/native-google-auth",
   "version": "0.1.1",
-  "description": "Native Google sign-in for Expo using Android Credential Manager",
+  "description": "Native Google sign-in for Expo on Android and iOS",
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "scripts": {

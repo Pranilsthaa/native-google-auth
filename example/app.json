@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "native-google-auth-example",
+    "slug": "native-google-auth-example",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.stha-pranil.nativegoogleauth.example"
+    },
+    "android": {
+      "package": "com.stha_pranil.nativegoogleauth.example"
+    },
+    "experiments": {
+      "autolinkingModuleResolution": true
+    }
+  }
+}
+

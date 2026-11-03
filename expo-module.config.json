@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["NativeGoogleAuthModule"]
+  },
+  "android": {
+    "modules": ["com.stha_pranil.nativegoogleauth.NativeGoogleAuthModule"]
+  }
+}
